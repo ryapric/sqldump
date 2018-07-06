@@ -15,6 +15,7 @@ get_sql_tablenames <- function(query) {
 build_sql_query <- function(file) {
   # Vector adjustment, just in case the dump has multiple lines per statement
   query <- paste(readLines(file), collapse = "\n")
+
   tablenames <- get_sql_tablenames(query)
 
   dump_type <- "sqlite"
@@ -28,22 +29,31 @@ build_sql_query <- function(file) {
 
   if (dump_type == "postgres") {
     # PostgreSQL dump uses pasted values (stdin) as its raw data input stream, so big parse loop here
-    for (i in length(query[grepl("COPY .* FROM stdin", query)])) {
-      col_names <- query[i]
+    stdin_copies <- query[grepl("COPY .* FROM stdin", query)]
+    for (i in length(stdin_copies)) {
+      col_names <- stdin_copies[i]
       col_names <- gsub("COPY .* (\\(.*\\)).*", "\\1", col_names)
 
       stdin_data <- query[which(grepl("COPY .* FROM stdin", query)) + 1]
-      # stdin_data <- gsub("\\.;", "", stdin_data, fixed = TRUE)
-      # stdin_data <- unlist(strsplit(stdin_data, "\n"))
+      stdin_data <- gsub("\\.;", "", stdin_data, fixed = TRUE)
+      stdin_data <- unlist(strsplit(stdin_data, "\n"))
+      stdin_data <- strsplit(stdin_data, "\t")
+      # Set character values as such, by SQL standards
+      stdin_data <- lapply(stdin_data, function(x) {
+        suppressWarnings(x[which(is.na(as.numeric(x)))] <- paste0("'", x[which(is.na(as.numeric(x)))], "'"))
+        x
+      })
+      stdin_data <- lapply(stdin_data, function(x) paste0("(", paste(x, collapse = ", "), ")"))
+      stdin_data <- unlist(stdin_data)
 
-      postgres_query <- paste("COPY", tablenames[i], col_names, "FROM stdin;")
-
-      # postgres_query <- paste(
-      #   "INSERT INTO", tablenames[i],
-      #   col_names,
-      #   "VALUES",
-      #
-      # )
+      postgres_query <- paste(
+        "INSERT INTO",
+        tablenames[i],
+        col_names,
+        "VALUES",
+        paste(stdin_data, collapse = ", "),
+        ";"
+      )
     }
   }
 
@@ -60,6 +70,8 @@ build_sql_query <- function(file) {
 
   query <- query[!grepl(paste(delete_stmts, collapse = "|"), query, ignore.case = TRUE)]
   query <- query[grepl(paste(keep_stmts, collapse = "|"), query, ignore.case = TRUE)]
+  # Drop schema label, e.g. "public.iris"
+  query <- gsub("CREATE TABLE .*\\.", "CREATE TABLE ", query)
   if (dump_type == "postgres") {
     query <- c(query, postgres_query)
   }

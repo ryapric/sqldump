@@ -1,8 +1,9 @@
 Package: sqldump
-Title: Read SQL Dump Scripts Into Data Frames
+Title: Generate Data Frames from SQL Dump Files
 Description:
-  'sqldump' provides a means to generate data frames from SQL dump scripts.
-Version: 1.0.0
+  'sqldump' provides a means to generate data frames from SQL dump scripts,
+  which contain SQL statements to recreate part or all of an RDBMS.
+Version: 0.1.0
 Date: 2018-07-06
 Authors@R:
   c(person("Ryan", "Price", email = "ryapric@gmail.com", role = c("cre", "aut")))
