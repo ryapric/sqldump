@@ -1,0 +1,51 @@
+Generate R Data Frames from SQL Dump Files
+================
+Ryan Price <ryapric@gmail.com>
+2018-07-06
+
+<!--
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/sqldump)](https://cran.r-project.org/package=sqldump)
+-->
+
+This package is designed to handle data frame generation based on the
+instructions available in “SQL dumps”, or SQL script files containing
+table & schema creation steps. These dump fles are often used as
+plain-text database backups, and are also sometimes sent around within
+organizations as a means of sharing data, without actually needing
+access to a database.
+
+## Features
+
+## How to Use
+
+## Installation
+
+You can install the latest CRAN release of `sqldump` via
+`install.packages("sqldump")`.
+
+Or, to get the latest development version from GitHub –
+
+Via [devtools](https://github.com/hadley/devtools):
+
+    devtools::install_github("ryapric/sqldump")
+
+Or, clone & build from source:
+
+    cd /path/to/your/repos
+    git clone https://github.com/ryapric/sqldump.git sqldump
+    R CMD INSTALL sqldump
+
+To use the most recent development version of `sqldump` in your own
+package, you can include it in your `Remotes:` field in your DESCRIPTION
+file:
+
+    Remotes: github::ryapric/sqldump
+
+Note that packages being submitted to CRAN *cannot* have a `Remotes`
+field. Refer
+[here](https://cran.r-project.org/web/packages/devtools/vignettes/dependencies.html)
+for more info.
+
+## License
+
+MIT
