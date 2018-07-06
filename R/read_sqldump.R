@@ -9,6 +9,41 @@ get_sql_tablenames <- function(query) {
   tables
 }
 
+# PostgreSQL Helper
+build_postgres_query <- function(query) {
+  # PostgreSQL dump uses pasted values (stdin) as its raw data input stream, so big parse loop here
+  tablenames <- get_sql_tablenames(query)
+  stdin_copies <- query[grepl("COPY .* FROM stdin", query)]
+  postgres_query <- character(length(stdin_copies))
+  for (i in length(stdin_copies)) {
+    col_names <- stdin_copies[i]
+    col_names <- gsub("COPY .* (\\(.*\\)).*", "\\1", col_names)
+
+    stdin_data <- query[which(grepl("COPY .* FROM stdin", query)) + 1]
+    stdin_data <- gsub("\\.;", "", stdin_data, fixed = TRUE)
+    stdin_data <- unlist(strsplit(stdin_data, "\n"))
+    stdin_data <- strsplit(stdin_data, "\t")
+    # Set character values as such, by SQL standards
+    stdin_data <- lapply(stdin_data, function(x) {
+      suppressWarnings(x[which(is.na(as.numeric(x)))] <- paste0("'", x[which(is.na(as.numeric(x)))], "'"))
+      x
+    })
+    stdin_data <- lapply(stdin_data, function(x) paste0("(", paste(x, collapse = ", "), ")"))
+    stdin_data <- unlist(stdin_data)
+
+    postgres_query[i] <- paste(
+      "INSERT INTO",
+      tablenames[i],
+      col_names,
+      "VALUES",
+      paste(stdin_data, collapse = ", "),
+      ";"
+    )
+  }
+
+  postgres_query
+}
+
 # Build SQL query from SQL dump file
 #
 # @param file SQL dump script.
@@ -28,33 +63,7 @@ build_sql_query <- function(file) {
   query <- gsub(";;", ";", query)
 
   if (dump_type == "postgres") {
-    # PostgreSQL dump uses pasted values (stdin) as its raw data input stream, so big parse loop here
-    stdin_copies <- query[grepl("COPY .* FROM stdin", query)]
-    for (i in length(stdin_copies)) {
-      col_names <- stdin_copies[i]
-      col_names <- gsub("COPY .* (\\(.*\\)).*", "\\1", col_names)
-
-      stdin_data <- query[which(grepl("COPY .* FROM stdin", query)) + 1]
-      stdin_data <- gsub("\\.;", "", stdin_data, fixed = TRUE)
-      stdin_data <- unlist(strsplit(stdin_data, "\n"))
-      stdin_data <- strsplit(stdin_data, "\t")
-      # Set character values as such, by SQL standards
-      stdin_data <- lapply(stdin_data, function(x) {
-        suppressWarnings(x[which(is.na(as.numeric(x)))] <- paste0("'", x[which(is.na(as.numeric(x)))], "'"))
-        x
-      })
-      stdin_data <- lapply(stdin_data, function(x) paste0("(", paste(x, collapse = ", "), ")"))
-      stdin_data <- unlist(stdin_data)
-
-      postgres_query <- paste(
-        "INSERT INTO",
-        tablenames[i],
-        col_names,
-        "VALUES",
-        paste(stdin_data, collapse = ", "),
-        ";"
-      )
-    }
+    postgres_query <- build_postgres_query(query)
   }
 
   # For SQLite compatibilty with other RDBMS, only keep SQL standards
@@ -86,9 +95,12 @@ build_sql_query <- function(file) {
 #' @param file File path to a SQL dump. Should have extension `.sql`.
 #'
 #' @examples
-#'  read_sqldump(system.file("example_data/example-sqlite-dump.sql", package = "sqldump", mustWork = TRUE))
-#'  read_sqldump(system.file("example_data/example-mysql-dump.sql", package = "sqldump", mustWork = TRUE))
-#'  read_sqldump(system.file("example_data/example-postgresql-dump.sql", package = "sqldump", mustWork = TRUE))
+#'  read_sqldump(system.file("example_data/example-sqlite-dump.sql",
+#'               package = "sqldump", mustWork = TRUE))
+#'  read_sqldump(system.file("example_data/example-mysql-dump.sql",
+#'               package = "sqldump", mustWork = TRUE))
+#'  read_sqldump(system.file("example_data/example-postgresql-dump.sql",
+#'               package = "sqldump", mustWork = TRUE))
 #'
 #' @export
 read_sqldump <- function(file) {
