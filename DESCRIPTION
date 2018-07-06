@@ -1,0 +1,20 @@
+Package: sqldump
+Title: Read SQL Dump Scripts Into Data Frames
+Description:
+  'sqldump' provides a means to generate data frames from SQL dump scripts.
+Version: 1.0.0
+Date: 2018-07-06
+Authors@R:
+  c(person("Ryan", "Price", email = "ryapric@gmail.com", role = c("cre", "aut")))
+License: MIT + file LICENSE
+Depends: R (>= 3.4.0)
+Imports:
+  RSQLite
+Suggests:
+  knitr (>= 1.19),
+  rmarkdown (>= 1.8),
+  testthat (>= 2.0.0)
+URL: https://github.com/ryapric/sqldump
+BugReports: https://github.com/ryapric/sqldump/issues
+RoxygenNote: 6.0.1
+Roxygen: list(markdown = TRUE)
