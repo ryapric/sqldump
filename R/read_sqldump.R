@@ -15,11 +15,11 @@ build_postgres_query <- function(query) {
   tablenames <- get_sql_tablenames(query)
   stdin_copies <- query[grepl("COPY .* FROM stdin", query)]
   postgres_query <- character(length(stdin_copies))
-  for (i in length(stdin_copies)) {
+  for (i in 1:length(stdin_copies)) {
     col_names <- stdin_copies[i]
     col_names <- gsub("COPY .* (\\(.*\\)).*", "\\1", col_names)
 
-    stdin_data <- query[which(grepl("COPY .* FROM stdin", query)) + 1]
+    stdin_data <- query[which(grepl("COPY .* FROM stdin", query)) + 1][i]
     stdin_data <- gsub("\\.;", "", stdin_data, fixed = TRUE)
     stdin_data <- unlist(strsplit(stdin_data, "\n"))
     stdin_data <- strsplit(stdin_data, "\t")
@@ -84,6 +84,7 @@ build_sql_query <- function(file) {
   if (dump_type == "postgres") {
     query <- c(query, postgres_query)
   }
+  query <- query[query != ""]
 
   query
 }
