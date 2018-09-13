@@ -20,9 +20,12 @@ write_sqldump <- function(table_list, outfile) {
 
     for (tblname in names(table_list)) {
 
+        # For less-verbose calls; re-assigned at end of loop
+        df_i <- table_list[[tblname]]
+
         # Schema builder
-        colnames(table_list[[tblname]]) <- gsub("[[:punct:]]", "_", colnames(table_list[[tblname]]))
-        schema <- lapply(table_list[[tblname]], class)
+        colnames(df_i) <- gsub("[[:punct:]]", "_", colnames(df_i))
+        schema <- lapply(df_i, class)
         schema <- lapply(schema, function(x) gsub("character|factor", "TEXT", x))
         schema <- lapply(schema, function(x) gsub("numeric|double|integer", "NUMERIC", x))
 
@@ -36,19 +39,19 @@ write_sqldump <- function(table_list, outfile) {
         textlines$sql[last_field] <- gsub(", $", "", textlines$sql[last_field])
 
         # INSERT VALUES
-        for (i in 1:ncol(table_list[[tblname]])) {
-            if (class(table_list[[tblname]][, i]) == "factor") {
-                table_list[[tblname]][, i] <- as.character(table_list[[tblname]][, i])
+        for (i in 1:ncol(df_i)) {
+            if (class(df_i[, i]) == "factor") {
+                df_i[, i] <- as.character(df_i[, i])
             }
-            if (class(table_list[[tblname]][, i]) == "character") {
-                table_list[[tblname]][, i] <- paste0("'",table_list[[tblname]][, i],"'")
+            if (class(df_i[, i]) == "character") {
+                df_i[, i] <- paste0("'",df_i[, i],"'")
             }
         }
 
         textlines <- rbind(textlines, paste("INSERT INTO", tblname, "VALUES ("))
-        for (datum in 1:nrow(table_list[[tblname]])) {
+        for (datum in 1:nrow(df_i)) {
             textlines <- rbind(textlines,
-                               paste0("    ", paste(table_list[[tblname]][datum, ], collapse = ", "), ","))
+                               paste0("    ", paste(df_i[datum, ], collapse = ", "), ","))
         }
         textlines <- rbind(textlines, ");")
         last_field <- which(textlines$sql == ");") - 1
@@ -57,5 +60,7 @@ write_sqldump <- function(table_list, outfile) {
         # Write out
         cat(textlines$sql[2:length(textlines$sql)], file = outfile, sep = "\n", append = TRUE)
 
+        # Re-assign back to actual table list
+        table_list[[tblname]] <- df_i
     }
 }
