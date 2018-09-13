@@ -3,6 +3,7 @@
 ^.*\.log$
 ^.*\.json$
 ^.*\.txt$
+^.*\.sql$
 README.*
 cran-comments.md
 Jenkinsfile
