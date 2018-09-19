@@ -48,13 +48,13 @@ write_sqldump <- function(table_list, outfile) {
             }
         }
 
-        textlines <- rbind(textlines, paste("INSERT INTO", tblname, "VALUES ("))
+        textlines <- rbind(textlines, paste("INSERT INTO", tblname, "VALUES"))
         for (datum in 1:nrow(df_i)) {
             textlines <- rbind(textlines,
-                               paste0("    ", paste(df_i[datum, ], collapse = ", "), ","))
+                               paste0("    (", paste(df_i[datum, ], collapse = ", "), "),"))
         }
-        textlines <- rbind(textlines, ");")
-        last_field <- which(textlines$sql == ");") - 1
+        textlines <- rbind(textlines, ";")
+        last_field <- max(which(textlines$sql == ";")) - 1
         textlines$sql[last_field] <- gsub(",$", "", textlines$sql[last_field])
 
         # Write out
