@@ -12,6 +12,8 @@ knitr::wrap_rmd("README.Rmd")
 
 <!--
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/sqldump)](https://cran.r-project.org/package=sqldump)
+[![Build
+Status](https://travis-ci.org/ryapric/sqldump.svg?branch=master)](https://travis-ci.org/ryapric/sqldump)
 -->
 
 This package is designed to handle data frame generation based on the

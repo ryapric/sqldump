@@ -17,6 +17,6 @@ Provided a \code{data.frame}-like object, writes the equivalent SQL dump file to
 \code{outfile}.
 }
 \examples{
- write_sqldump(iris, file.path(tempdir(), "dump.sql"))
+ write_sqldump(list(iris = iris), file.path(tempdir(), "dump.sql"))
 
 }

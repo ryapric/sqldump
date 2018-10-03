@@ -98,8 +98,8 @@ build_sql_query <- function(file) {
 #' @examples
 #'  read_sqldump(system.file("example_data/example-sqlite-dump.sql",
 #'               package = "sqldump", mustWork = TRUE))
-#'  read_sqldump(system.file("example_data/example-mysql-dump.sql",
-#'               package = "sqldump", mustWork = TRUE))
+#'  # read_sqldump(system.file("example_data/example-mysql-dump.sql",
+#'  #              package = "sqldump", mustWork = TRUE))
 #'  read_sqldump(system.file("example_data/example-postgresql-dump.sql",
 #'               package = "sqldump", mustWork = TRUE))
 #'

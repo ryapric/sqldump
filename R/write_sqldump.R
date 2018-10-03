@@ -8,7 +8,7 @@
 #' @param outfile Dump file destination
 #'
 #' @examples
-#'  write_sqldump(iris, file.path(tempdir(), "dump.sql"))
+#'  write_sqldump(list(iris = iris), file.path(tempdir(), "dump.sql"))
 #'
 #' @export
 write_sqldump <- function(table_list, outfile) {
