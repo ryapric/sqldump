@@ -19,6 +19,5 @@ Read SQL Dump File
  #              package = "sqldump", mustWork = TRUE))
  read_sqldump(system.file("example_data/example-postgresql-dump.sql",
               package = "sqldump", mustWork = TRUE))
-              print(getwd())
 
 }

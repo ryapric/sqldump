@@ -39,6 +39,7 @@ write_sqldump <- function(table_list, outfile) {
         textlines$sql[last_field] <- gsub(", $", "", textlines$sql[last_field])
 
         # INSERT VALUES
+        # Convert factors to characters, and wrap values in single quotes for SQL
         for (i in 1:ncol(df_i)) {
             if (class(df_i[, i]) == "factor") {
                 df_i[, i] <- as.character(df_i[, i])
@@ -50,8 +51,10 @@ write_sqldump <- function(table_list, outfile) {
 
         textlines <- rbind(textlines, paste("INSERT INTO", tblname, "VALUES"))
         for (datum in 1:nrow(df_i)) {
-            textlines <- rbind(textlines,
-                               paste0("    (", paste(df_i[datum, ], collapse = ", "), "),"))
+            textline_i <- paste0("    (", paste(df_i[datum, ], collapse = ", "), "),")
+            # Escape single quotes
+            textline_i <- gsub("'", "''", textline_i)
+            textlines <- rbind(textlines, textline_i)
         }
         textlines <- rbind(textlines, ";")
         last_field <- max(which(textlines$sql == ";")) - 1
