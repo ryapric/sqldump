@@ -14,7 +14,7 @@
 write_sqldump <- function(table_list, outfile) {
 
     stopifnot(class(table_list) == "list")
-    stopifnot(all(grepl("data\\.frame", unlist(lapply(table_list, class)))))
+    stopifnot(any(grepl("data\\.frame", unlist(lapply(table_list, class)))))
 
     if (file.exists(outfile)) file.remove(outfile)
 
